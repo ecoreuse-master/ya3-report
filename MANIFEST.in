@@ -1,0 +1,2 @@
+include entry_points.cfg
+include ya3_report/notebooks/*.ipynb

@@ -1,0 +1,11 @@
+click
+pandas
+matplotlib
+jupyter
+papermill
+
+# For dev
+mypy
+coverage
+flake8
+
