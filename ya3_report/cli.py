@@ -4,10 +4,10 @@ import subprocess
 from pathlib import Path
 
 import click
+import papermill
 
 
 CONVERT_CHOICE = [
-    "",
     "asciidoc",
     "custom",
     "html",
@@ -46,18 +46,13 @@ def report(
     os.environ["YA3_REPORT_DATAFILE_SUFFIX"] = datafile_suffix
 
 
-def create_report(report_path: Path, output: Path, to: str) -> None:
-    subprocess.run(
-        ["papermill", report_path.as_posix(), output],
-        env=os.environ,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
-    if to:
+def create_report(report_path: Path, output: Path, tos: tuple[str, ...]) -> None:
+    papermill.execute_notebook(report_path.as_posix(), output, progress_bar=False)
+    for to in tos:
         subprocess.run(
             ["jupyter", "nbconvert", output, "--to", to],
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+            stderr=subprocess.PIPE,
         )
 
 
@@ -70,8 +65,14 @@ def create_report(report_path: Path, output: Path, to: str) -> None:
     help="output path",
     show_default=True,
 )
-@click.option("--to", type=click.Choice(CONVERT_CHOICE), default="", help="convert type", show_default=True)
-def daily(output: str, to: str) -> None:
+@click.option(
+    "--to",
+    type=click.Choice(CONVERT_CHOICE),
+    default=[],
+    multiple=True,
+    help="convert type",
+)
+def daily(output: str, to: tuple[str, ...]) -> None:
     report_path = Path(__file__).parent / "notebooks" / "daily_report.ipynb"
     create_report(report_path, Path(output), to)
 
@@ -85,7 +86,13 @@ def daily(output: str, to: str) -> None:
     help="output path",
     show_default=True,
 )
-@click.option("--to", type=click.Choice(CONVERT_CHOICE), default="", help="convert type", show_default=True)
-def weekly(output: str, to: str) -> None:
+@click.option(
+    "--to",
+    type=click.Choice(CONVERT_CHOICE),
+    default=[],
+    multiple=True,
+    help="convert type",
+)
+def weekly(output: str, to: tuple[str, ...]) -> None:
     report_path = Path(__file__).parent / "notebooks" / "weekly_report.ipynb"
     create_report(report_path, Path(output), to)
