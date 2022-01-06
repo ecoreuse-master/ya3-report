@@ -1,5 +1,5 @@
 # Copyright 2022 Shuhei Nitta. All rights reserved.
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 import pandas as pd
 import matplotlib.pyplot as plt
