@@ -1,4 +1,4 @@
-# Copyright (c) Shuhei Nitta. All rights reserved.
+# Copyright (c) 2022 Shuhei Nitta. All rights reserved.
 from datetime import date, datetime, timedelta
 from typing import Optional
 
@@ -10,7 +10,7 @@ from ya3_report import daily
 
 def get_data(dt: Optional[date] = None) -> pd.DataFrame:  # pragma: no cover
     _dt = dt if dt else date.today()
-    dfs = [pd.DataFrame()]
+    dfs: list[pd.DataFrame] = []
     for i in range(7):
         try:
             dfs.append(daily.get_data(_dt - timedelta(days=i)))
@@ -20,9 +20,11 @@ def get_data(dt: Optional[date] = None) -> pd.DataFrame:  # pragma: no cover
 
 
 def index_datehour(df: pd.DataFrame) -> pd.DataFrame:
-    df["date"] = df["datetime"].apply(lambda x: datetime.fromisoformat(x).date())
+    df_copy = df.copy()
+    df_copy["date"] = df["datetime"].apply(lambda x: datetime.fromisoformat(x).date())
     dfs = []
-    for dt, group in df.groupby("date"):
+    for dt, group in df_copy.groupby("date"):
+        assert isinstance(dt, date)
         _df = daily.index_hour(group).reset_index()
         _df["date"] = dt.isoformat()
         _df["day"] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.weekday()]
