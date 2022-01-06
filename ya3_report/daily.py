@@ -1,9 +1,11 @@
 # Copyright 2022 Shuhei Nitta. All rights reserved.
 from pathlib import Path
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Callable, Any
 
 import pandas as pd
+import numpy as np
+import numpy.typing as npt
 
 from ya3_report import environ
 
@@ -27,8 +29,9 @@ def index_hour(df: pd.DataFrame) -> pd.DataFrame:
     for _, group in df.groupby("aID"):
         group.sort_values("datetime")
         group["hour"] = group["datetime"].apply(lambda x: datetime.fromisoformat(x).hour)
+        threshold_0: Callable[[Any], npt.NDArray[Any]] = lambda x: np.where(x < 0, 0, x)
         for label in count_labels:
-            group[label + "_diff"] = group[label].diff()
+            group[label + "_diff"] = threshold_0(group[label].diff())
         for hour, _group in group.groupby("hour"):
             for label in count_labels:
                 _df.at[hour, label] += _group[label + "_diff"].sum()
