@@ -28,7 +28,7 @@ def index_hour(df: pd.DataFrame) -> pd.DataFrame:
     count_labels = ["access", "watch", "bid"]
     for _, group in df.groupby("aID"):
         group.sort_values("datetime")
-        group["hour"] = group["datetime"].apply(lambda x: datetime.fromisoformat(x).hour)
+        group["hour"] = group["datetime"].map(lambda x: datetime.fromisoformat(x).hour)
         threshold_0: Callable[[Any], npt.NDArray[Any]] = lambda x: np.where(x < 0, 0, x)
         for label in count_labels:
             group[label + "_diff"] = threshold_0(group[label].diff())
@@ -39,15 +39,15 @@ def index_hour(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def index_aID(df: pd.DataFrame) -> pd.DataFrame:
-    aIDs = []
-    titles = []
-    access = []
-    watch = []
-    bid = []
+    aIDs: list[str] = []
+    titles: list[str] = []
+    access: list[int] = []
+    watch: list[int] = []
+    bid: list[int] = []
     for aID, group in df.groupby("aID"):
         aIDs.append(aID)
         titles.append(list(group["title"])[-1])
-        access.append(group["access"].max() - group["access"].min())
-        watch.append(group["watch"].max() - group["watch"].min())
-        bid.append(group["bid"].max() - group["bid"].min())
+        access.append(int(group["access"].max() - group["access"].min()))
+        watch.append(int(group["watch"].max() - group["watch"].min()))
+        bid.append(int(group["bid"].max() - group["bid"].min()))
     return pd.DataFrame({"aID": aIDs, "title": titles, "access": access, "watch": watch, "bid": bid}).set_index("aID")

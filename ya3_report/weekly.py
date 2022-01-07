@@ -21,14 +21,14 @@ def get_data(dt: Optional[date] = None) -> pd.DataFrame:  # pragma: no cover
 
 def index_datehour(df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy()
-    df_copy["date"] = df["datetime"].apply(lambda x: datetime.fromisoformat(x).date())
-    dfs = []
+    df_copy["date"] = df["datetime"].map(lambda x: datetime.fromisoformat(x).date())
+    dfs: list[pd.DataFrame] = []
     for dt, group in df_copy.groupby("date"):
         assert isinstance(dt, date)
         _df = daily.index_hour(group).reset_index()
         _df["date"] = dt.isoformat()
         _df["day"] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.weekday()]
-        _df["date-hour"] = _df["hour"].apply(
+        _df["date-hour"] = _df["hour"].map(
             lambda hour: datetime(dt.year, dt.month, dt.day, hour).isoformat(timespec="minutes")
         )
         dfs.append(_df)
