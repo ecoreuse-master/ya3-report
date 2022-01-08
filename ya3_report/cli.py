@@ -96,3 +96,24 @@ def daily(output: str, to: tuple[str, ...]) -> None:
 def weekly(output: str, to: tuple[str, ...]) -> None:
     report_path = Path(__file__).parent / "notebooks" / "weekly_report.ipynb"
     create_report(report_path, Path(output), to)
+
+
+@report.command()
+@click.option(
+    "-o",
+    "--output",
+    type=click.types.Path(),
+    default="monthly_report.ipynb",
+    help="output path",
+    show_default=True,
+)
+@click.option(
+    "--to",
+    type=click.Choice(CONVERT_CHOICE),
+    default=[],
+    multiple=True,
+    help="convert type",
+)
+def monthly(output: str, to: tuple[str, ...]) -> None:
+    report_path = Path(__file__).parent / "notebooks" / "monthly_report.ipynb"
+    create_report(report_path, Path(output), to)
