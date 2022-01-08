@@ -20,19 +20,24 @@ def get_data(dt: Optional[date] = None) -> pd.DataFrame:  # pragma: no cover
 
 
 def index_datehour(df: pd.DataFrame) -> pd.DataFrame:
-    df_copy = df.copy()
-    df_copy["date"] = df["datetime"].map(lambda x: datetime.fromisoformat(x).date())
-    dfs: list[pd.DataFrame] = []
-    for dt, group in df_copy.groupby("date"):
-        assert isinstance(dt, date)
-        _df = daily.index_hour(group).reset_index()
-        _df["date"] = dt.isoformat()
-        _df["day"] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.weekday()]
-        _df["date-hour"] = _df["hour"].map(
-            lambda hour: datetime(dt.year, dt.month, dt.day, hour).isoformat(timespec="minutes")
-        )
-        dfs.append(_df)
-    return pd.concat(dfs).set_index("date-hour")
+    weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+    def f(df: pd.DataFrame) -> pd.DataFrame:
+        dt = datetime.fromisoformat(df.index[0]).date()
+        return daily.index_hour(df.reset_index()). \
+            reset_index(). \
+            assign(
+                date=dt.isoformat(),
+                day=weekdays[dt.weekday()],
+                datehour=lambda df: df["hour"].map(
+                    lambda hour: datetime(dt.year, dt.month, dt.day, hour).isoformat(timespec="minutes")
+                )
+            )
+    return df. \
+        set_index("datetime"). \
+        groupby(lambda idx: datetime.fromisoformat(idx).date()). \
+        apply(f). \
+        set_index("datehour")
 
 
 def plot_count_by_day(df_datehour: pd.DataFrame, label: str) -> plt.Axes:  # pragma: no cover
