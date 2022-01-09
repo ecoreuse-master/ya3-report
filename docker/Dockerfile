@@ -13,6 +13,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 
 WORKDIR /ya3
+RUN mkdir data
 ENV PYTHONUNBUFFERED 1
 
 ENTRYPOINT [ "ya3-report" ]
